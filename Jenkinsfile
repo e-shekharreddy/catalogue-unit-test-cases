@@ -1,4 +1,3 @@
-@Library('jenkins-test-library') _
 
 def configMap = [
     project: "roboshop",
@@ -11,5 +10,5 @@ if ( env.BRANCH_NAME.equalsIgnoreCase('main') ){
      echo "checking later"
 }
 else{
-    testPipeline(configMap)
+    nodeJSEKSPipeline(configMap)
 }
