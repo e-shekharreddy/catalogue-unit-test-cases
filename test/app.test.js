@@ -116,60 +116,48 @@ describe('MongoDB disconnected', () => {
         delete process.env.CATALOGUE_SERVER_PORT;
     });
 
-    test('GET /products returns 500', async () => {
-        const res = await request(disconnectedApp).get('/products');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /product/:sku returns 500', async () => {
-        const res = await request(disconnectedApp).get('/product/CAT-001');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /products/:cat returns 500', async () => {
-        const res = await request(disconnectedApp).get('/products/apparel');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /categories returns 500', async () => {
-        const res = await request(disconnectedApp).get('/categories');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /search/:text returns 500', async () => {
-        const res = await request(disconnectedApp).get('/search/robot');
+    test.each([
+        ['/products'],
+        ['/product/CAT-001'],
+        ['/products/apparel'],
+        ['/categories'],
+        ['/search/robot']
+    ])('GET %s returns 500', async (route) => {
+        const res = await request(disconnectedApp).get(route);
         expect(res.status).toBe(500);
     });
 });
 
 describe('DB error handling', () => {
-    test('GET /products returns 500 on db error', async () => {
-        mockFindResult.toArray.mockRejectedValueOnce(new Error('db error'));
-        const res = await request(app).get('/products');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /product/:sku returns 500 on db error', async () => {
-        mockCollection.findOne.mockRejectedValueOnce(new Error('db error'));
-        const res = await request(app).get('/product/CAT-001');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /products/:cat returns 500 on db error', async () => {
-        mockFindResult.toArray.mockRejectedValueOnce(new Error('db error'));
-        const res = await request(app).get('/products/apparel');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /categories returns 500 on db error', async () => {
-        mockCollection.distinct.mockRejectedValueOnce(new Error('db error'));
-        const res = await request(app).get('/categories');
-        expect(res.status).toBe(500);
-    });
-
-    test('GET /search/:text returns 500 on db error', async () => {
-        mockFindResult.toArray.mockRejectedValueOnce(new Error('db error'));
-        const res = await request(app).get('/search/robot');
+    test.each([
+        {
+            name: 'GET /products returns 500 on db error',
+            route: '/products',
+            mockFn: () => mockFindResult.toArray.mockRejectedValueOnce(new Error('db error'))
+        },
+        {
+            name: 'GET /product/:sku returns 500 on db error',
+            route: '/product/CAT-001',
+            mockFn: () => mockCollection.findOne.mockRejectedValueOnce(new Error('db error'))
+        },
+        {
+            name: 'GET /products/:cat returns 500 on db error',
+            route: '/products/apparel',
+            mockFn: () => mockFindResult.toArray.mockRejectedValueOnce(new Error('db error'))
+        },
+        {
+            name: 'GET /categories returns 500 on db error',
+            route: '/categories',
+            mockFn: () => mockCollection.distinct.mockRejectedValueOnce(new Error('db error'))
+        },
+        {
+            name: 'GET /search/:text returns 500 on db error',
+            route: '/search/robot',
+            mockFn: () => mockFindResult.toArray.mockRejectedValueOnce(new Error('db error'))
+        }
+    ])('$name', async ({ route, mockFn }) => {
+        mockFn();
+        const res = await request(app).get(route);
         expect(res.status).toBe(500);
     });
 });
