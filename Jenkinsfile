@@ -1,4 +1,5 @@
 
+
 def configMap = [
     project: "roboshop",
     component: "catalogue"
@@ -7,10 +8,8 @@ def configMap = [
 echo "Triggering the library pipeline"
 
 if ( env.BRANCH_NAME.equalsIgnoreCase('main') ){
-    configMap["jiraProject"] = "ROBO"
-    nodeJSEKSMainPipeline(configMap)
+     echo "checking later"
 }
 else{
-    configMap["jiraProject"] = "ROBO"
     nodeJSEKSPipeline(configMap)
 }
